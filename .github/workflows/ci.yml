@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-wasip1
+      - uses: Swatinem/rust-cache@v2
+      - name: Test natively
+        run: cargo test --lib
+      - name: Build and package the plugin
+        run: sh package.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plank-csvedit
+          path: dist/plank-csvedit.tar.gz

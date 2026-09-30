@@ -1,6 +1,6 @@
-# A Turbo Vision CSV editor as a plank frame component. Not a workspace
-# member of plank: it targets wasm32-wasip1 (WASI makes Instant::now() work,
-# which Turbo Vision needs). Native `cargo test` runs the pure modules.
+# A Turbo Vision CSV editor as a plank frame component. Its own workspace: it
+# targets wasm32-wasip1 (WASI makes Instant::now() work, which Turbo Vision
+# needs). Native `cargo test --lib` runs the pure modules.
 [workspace]
 
 [package]
@@ -8,6 +8,8 @@ name = "plank-csvedit"
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
+authors = ["Enzo Lombardi <enzinol@gmail.com>"]
+repository = "https://github.com/aovestdipaperino/plank-csvedit"
 publish = false
 
 [lib]
@@ -15,7 +17,8 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 extism-pdk = "1"
-plank-guest-support = { path = "../support" }
+# Glyph packing and the OpenParams JSON readers shared by plank's guests.
+plank-guest-support = { git = "https://github.com/aovestdipaperino/plank-guest-support", rev = "058b7422b1082670828fb4167b241a2793c6d8f1" }
 # Turbo Vision without its terminal (`default-features = false` drops the
 # `native` feature: crossterm and arboard). Pinned to the same core rev
 # tv-extensions uses, so the two resolve to one turbo-vision.
