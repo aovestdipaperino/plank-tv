@@ -20,7 +20,7 @@ mkdir -p "$DIST/csvedit/.plank-plugin" "$DIST/csvedit/wasm"
 
 cargo build --release --target wasm32-wasip1
 cp plugin.json "$DIST/csvedit/.plank-plugin/plugin.json"
-cp target/wasm32-wasip1/release/plank_csvedit.wasm "$DIST/csvedit/wasm/csvedit.wasm"
+cp target/wasm32-wasip1/release/plank_tv.wasm "$DIST/csvedit/wasm/csvedit.wasm"
 tar -czf "$DIST/plank-csvedit.tar.gz" -C "$DIST" csvedit
 
 {
