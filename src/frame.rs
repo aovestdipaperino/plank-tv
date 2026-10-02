@@ -11,9 +11,11 @@ use std::cell::RefCell;
 use extism_pdk::*;
 use plank_guest_support::{encode_cells, int, text};
 
+use tv_extensions::csv::{Disk, Session};
+use tv_extensions::keys::translate;
+
 use crate::disk::PlankDisk;
-use crate::editor::Session;
-use crate::keys::{payload_text, translate};
+use crate::keys::payload_text;
 
 thread_local! {
     static SESSION: RefCell<Option<Session>> = const { RefCell::new(None) };
@@ -56,11 +58,11 @@ pub fn command_specs() -> FnResult<String> {
 }
 
 /// `new` opens the frame with an empty arg, `open NAME` with arg `NAME`, and a
-/// bare `open` (no name) with the [`crate::editor::OPEN_DIALOG_ARG`] sentinel
-/// so the frame comes up showing the Open dialog. The host only ever opens
-/// the calling component's own frame, so `open` names an arg, never a
-/// component. An unknown command name is reported rather than silently
-/// treated as `new`.
+/// bare `open` (no name) with the [`tv_extensions::csv::OPEN_DIALOG_ARG`]
+/// sentinel so the frame comes up showing the Open dialog. The host only
+/// ever opens the calling component's own frame, so `open` names an arg,
+/// never a component. An unknown command name is reported rather than
+/// silently treated as `new`.
 #[plugin_fn]
 pub fn command_run(input: String) -> FnResult<String> {
     // A slash command means the tool path is over: a pending tool-invoked
@@ -74,7 +76,7 @@ pub fn command_run(input: String) -> FnResult<String> {
         "open" if arg.is_empty() => {
             format!(
                 "{{\"open\": {}}}",
-                json_string(crate::editor::OPEN_DIALOG_ARG)
+                json_string(tv_extensions::csv::OPEN_DIALOG_ARG)
             )
         }
         "open" => format!("{{\"open\": {}}}", json_string(arg)),
@@ -95,10 +97,14 @@ pub fn frame_open(input: String) -> FnResult<String> {
     // a directive plank never honoured attaching to a later, unrelated open.
     let pending = PENDING_TOOL_OPEN.with(|p| p.borrow_mut().take());
     if pending.as_deref() == Some(arg.as_str()) {
-        let original = crate::disk::Disk::read(&PlankDisk, &arg).unwrap_or_default();
+        let original = Disk::read(&PlankDisk, &arg).unwrap_or_default();
         ORIGINAL.with(|o| *o.borrow_mut() = Some((arg.clone(), original)));
     }
-    SESSION.with(|s| *s.borrow_mut() = Some(Session::open(w, h, &arg, Box::new(PlankDisk))));
+    // `open_bridged`, not `open`: keeps the bridged-grid mode (first header
+    // cell `#`) that plank's MCP tables rely on.
+    SESSION.with(|s| {
+        *s.borrow_mut() = Some(Session::open_bridged(w, h, &arg, Box::new(PlankDisk)));
+    });
     Ok("{}".to_string())
 }
 
@@ -122,7 +128,7 @@ pub fn frame_step(input: String) -> FnResult<Vec<u8>> {
         let mut s = s.borrow_mut();
         let session = s.as_mut()?;
         session.step(w, h);
-        Some(session.cells())
+        Some(crate::paint::cells(session.buffer(), session.cursor()))
     });
     Ok(encode_cells(&cells.unwrap_or_default(), w, h))
 }
@@ -130,7 +136,7 @@ pub fn frame_step(input: String) -> FnResult<Vec<u8>> {
 #[plugin_fn]
 pub fn frame_close() -> FnResult<String> {
     if let Some((name, before)) = ORIGINAL.with(|o| o.borrow_mut().take()) {
-        let now = crate::disk::Disk::read(&PlankDisk, &name).unwrap_or_default();
+        let now = Disk::read(&PlankDisk, &name).unwrap_or_default();
         LAST_SUMMARY.with(|s| *s.borrow_mut() = Some(crate::summary::summarize(&before, &now)));
     }
     let line = SESSION.with(|s| s.borrow_mut().take().map(|s| s.close_line()));

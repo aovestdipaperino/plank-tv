@@ -1,51 +1,8 @@
-//! Where documents are saved: plank's RAM disk in the real component, a map
-//! in tests.
+//! plank's RAM disk, as a [`tv_extensions::csv::Disk`]. `Disk` and `MemDisk`
+//! moved to `tv_extensions::csv::disk`.
 
-use std::collections::BTreeMap;
-
-/// A place CSV files live. Paths are names at the disk's root.
-pub trait Disk {
-    /// A file's text.
-    ///
-    /// # Errors
-    /// When it does not exist or the host refused.
-    fn read(&self, path: &str) -> Result<String, String>;
-    /// Stores a file.
-    ///
-    /// # Errors
-    /// When the host refused (grant, quota).
-    fn write(&mut self, path: &str, text: &str) -> Result<(), String>;
-    /// The `.csv` files at the root, sorted.
-    ///
-    /// # Errors
-    /// When the host refused.
-    fn list(&self) -> Result<Vec<String>, String>;
-}
-
-/// An in-memory disk, for tests.
-#[derive(Debug, Default)]
-pub struct MemDisk(BTreeMap<String, String>);
-
-impl Disk for MemDisk {
-    fn read(&self, path: &str) -> Result<String, String> {
-        self.0
-            .get(path)
-            .cloned()
-            .ok_or_else(|| format!("no such file: /{path}"))
-    }
-    fn write(&mut self, path: &str, text: &str) -> Result<(), String> {
-        self.0.insert(path.to_string(), text.to_string());
-        Ok(())
-    }
-    fn list(&self) -> Result<Vec<String>, String> {
-        Ok(self
-            .0
-            .keys()
-            .filter(|k| k.ends_with(".csv"))
-            .cloned()
-            .collect())
-    }
-}
+#[cfg(target_arch = "wasm32")]
+use tv_extensions::csv::Disk;
 
 /// Decodes the `.csv` names out of plank's `plank_fs_list` JSON reply.
 ///
@@ -129,17 +86,6 @@ impl Disk for PlankDisk {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn mem_disk_round_trips_and_lists_only_csv() {
-        let mut d = MemDisk::default();
-        d.write("b.csv", "x").unwrap();
-        d.write("a.csv", "y").unwrap();
-        d.write("notes.txt", "z").unwrap();
-        assert_eq!(d.read("a.csv").unwrap(), "y");
-        assert_eq!(d.list().unwrap(), ["a.csv", "b.csv"]);
-        assert!(d.read("missing.csv").is_err());
-    }
 
     #[test]
     fn csv_names_finds_plain_names() {
