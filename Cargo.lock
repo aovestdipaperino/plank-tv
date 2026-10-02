@@ -714,9 +714,9 @@ dependencies = [
 
 [[package]]
 name = "turbo-vision"
-version = "4.0.1"
+version = "4.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b1914b25b2dd9dfec4b3cd323d6c6bc042d0add634be5c1e460e6f7cebe02fa"
+checksum = "33fb59f430cf411793e2b70c6312d7d2049d625f44d55dd2a8f07738b1d4cc0b"
 dependencies = [
  "chrono",
  "log",
@@ -726,9 +726,9 @@ dependencies = [
 
 [[package]]
 name = "tv-extensions"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92c5488292fdb536aa4992f9f90048cb4a99cb9670e2d0dfc4625451b664573c"
+checksum = "4fa626c0218538bee30315ffa6fdc114787f4aa97b545d1b7a5b259933d29b52"
 dependencies = [
  "turbo-vision",
 ]
