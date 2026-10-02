@@ -45,7 +45,7 @@ sh package.sh
 ```
 
 That writes `dist/csvedit/`, an installable plugin directory, plus
-`dist/plank-csvedit.tar.gz` and `dist/SHA256SUMS`. Install the directory or
+`dist/plank-tv.tar.gz` and `dist/SHA256SUMS`. Install the directory or
 the tarball with `/plugins install`, then approve the module with
 `/plugins trust dev.plank.csvedit`. The approval is recorded against the
 module's SHA-256, so it is asked again only when the bytes change.

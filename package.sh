@@ -8,7 +8,7 @@
 # Needs the wasm32-wasip1 target (`rustup target add wasm32-wasip1`): Turbo
 # Vision reads the clock, which needs WASI.
 #
-# Output: dist/csvedit/ (the installable directory), dist/plank-csvedit.tar.gz,
+# Output: dist/csvedit/ (the installable directory), dist/plank-tv.tar.gz,
 # and dist/SHA256SUMS with the module hash the trust store keys on, next to the
 # rustc version the bytes are reproducible for.
 set -e
@@ -21,10 +21,10 @@ mkdir -p "$DIST/csvedit/.plank-plugin" "$DIST/csvedit/wasm"
 cargo build --release --target wasm32-wasip1
 cp plugin.json "$DIST/csvedit/.plank-plugin/plugin.json"
 cp target/wasm32-wasip1/release/plank_tv.wasm "$DIST/csvedit/wasm/csvedit.wasm"
-tar -czf "$DIST/plank-csvedit.tar.gz" -C "$DIST" csvedit
+tar -czf "$DIST/plank-tv.tar.gz" -C "$DIST" csvedit
 
 {
-  echo "# plank-csvedit module"
+  echo "# plank-tv module"
   echo "# $(rustc --version)"
   (cd "$DIST/csvedit/wasm" && shasum -a 256 csvedit.wasm)
 } > "$DIST/SHA256SUMS"
