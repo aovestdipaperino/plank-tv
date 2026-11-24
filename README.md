@@ -1,5 +1,7 @@
 # plank-tv
 
+[![GitHub stars](https://img.shields.io/github/stars/aovestdipaperino/plank-tv?logo=github&color=brightgreen)](https://github.com/aovestdipaperino/plank-tv/stargazers)
+
 The [Turbo Vision](https://github.com/aovestdipaperino/turbo-vision-4-rust) <->
 [plank](https://github.com/aovestdipaperino/plank) glue, plus the csvedit
 plugin built on it: a full-screen CSV table editor that runs inside plank as
